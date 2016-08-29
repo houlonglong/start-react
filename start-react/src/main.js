@@ -62,7 +62,6 @@ var Banner = React.createClass({
 		return {
 			dataList : [
 				{link: '#', imgSrc: './images/banner/banner-01.jpg'},
-				{link: '#', imgSrc: './images/banner/banner-02.jpg'},
 				{link: '#', imgSrc: './images/banner/banner-03.jpg'},
 				{link: '#', imgSrc: './images/banner/banner-04.jpg'}
 			]
@@ -175,7 +174,7 @@ var Banner = React.createClass({
 		this.animate();
 	},
 	animate: function(afterChange) {
-		this.tag.style.webkitTransition = '300ms all ease';
+		this.tag.style.webkitTransition = '200ms all ease';
 		this.tag.style.webkitTransform = 'translate3d('+ this.left +'px, 0px, 0px)';
 		this.tag.addEventListener('webkitTransitionEnd', function(){
 			//动画执行完回调函数
