@@ -75,7 +75,7 @@ var Banner = React.createClass({
 		this.left = 0;			// 组件偏移位置
 		this.wd = 0;			// 组件宽度
 		this.current = 0;		// 组件当前索引值
-		this.startX = 0;		// 手指触摸起始位置
+		this.moveX = 0;		    // 手指滑动的距离
 		this.nowX = 0;			// 手指触摸结束位置
 		this.isAnimate = false; // 组件是否在进行动画
 		// 初始化组件高度
@@ -126,22 +126,18 @@ var Banner = React.createClass({
 		}
 		var event = e || window.event;
 		e.preventDefault();
-		this.nowX = event.touches[0].pageX;
-		var moveX = this.nowX - this.startX,
-			left = this.left + moveX;
-		this.tag.style.webkitTransform = 'translate3d('+ left +'px, 0px, 0px)';
+		this.moveX = event.touches[0].pageX - this.startX;
+		this.tag.style.webkitTransform = 'translate3d('+ (this.left + this.moveX) +'px, 0px, 0px)';
 	},
 	onTouchEnd: function(e) {
-		var moveX = this.nowX==0 ? 0 : (this.nowX - this.startX);
-		if(Math.abs(moveX)>50){
-			this.current = moveX>0 ? this.current-2 : this.current;
+		if(Math.abs(this.moveX)>50){
+			this.current = this.moveX>0 ? this.current-2 : this.current;
 			this.changePic(this.current);
 		}else{
 			this.tag.style.webkitTransition = '200ms all ease';
 			this.tag.style.webkitTransform = 'translate3d('+ this.left +'px, 0px, 0px)';
 		}
 		this.startX = 0;
-		this.nowX = 0;
 	},
 	// 点击切换
 	changePic: function(index) {
