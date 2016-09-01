@@ -120,6 +120,7 @@ var Banner = React.createClass({
 		this.startX = event.touches[0].pageX;
 	},
 	onTouchMove: function(e) {
+		// 判断组件是否完成动画
 		if(this.isAnimate){
 			return;
 		}
@@ -150,7 +151,7 @@ var Banner = React.createClass({
 		this.left = (-1)*(this.current+1)*this.wd;
 		this.animate();
 	},
-	animate: function(afterChange) {
+	animate: function() {
 		this.isAnimate = true;
 		this.tag.style.webkitTransition = '200ms all ease';
 		this.tag.style.webkitTransform = 'translate3d('+ this.left +'px, 0px, 0px)';
