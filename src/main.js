@@ -77,7 +77,6 @@ var Banner = React.createClass({
 		this.current = 0;		// 组件当前索引值
 		this.startX = 0;		// 手指触摸起始位置
 		this.nowX = 0;			// 手指触摸结束位置
-		this.isTouch = false;	// 手指是否按下
 		this.isAnimate = false; // 组件是否在进行动画
 		// 初始化组件高度
 		this.handleResize();
@@ -92,33 +91,18 @@ var Banner = React.createClass({
 		}.bind(this), 5000);
 	},
 	handleResize: function() {
-		var height,
-			t_img = null,   // 查询图片高度的定时器
-			isLoad = true ; // 判断图片是否加载
-		var that = this;
-		// 判断图片加载状况，加载完成后回调
-		isImgLoad(function(){
-			that.setState({
-				height: height
-			});
-		});
-		// 判断图片加载的函数
-		function isImgLoad(callback) {
-			height = that.id.getElementsByTagName("img")[0].height;
-			if(height===0 || height===that.state.height){
-				isLoad = false;
-			}
-			if(isLoad){
-				clearTimeout(t_img);
-				callback();
-				return;
-			}else{
-				isLoad = true;
-				t_img = setTimeout(function(){
-					isImgLoad(callback);
-				}, 10);
+		// 查询图片高度
+		var img = this.id.getElementsByTagName("img")[0];
+		function checkHeight(){
+			var height = img.height;
+			if(height>0){
+				this.setState({
+					height: height
+				});
+				clearInterval(imgTimer);
 			}
 		}
+		var imgTimer = setInterval(checkHeight.bind(this), 10);
 	},
 	setCss: function() {
 		this.wd = this.id.offsetWidth;
@@ -129,48 +113,37 @@ var Banner = React.createClass({
 		}
 	},
 	onTouchStart: function(e) {
+		var event = e || window.event;
+		e.preventDefault();
 		clearInterval(this.timer);
 		this.timer = null;
-		if(this.isTouch){
-			return;
-		}
-		this.isTouch = true;
-		var event = e || window.event;
 		this.startX = event.touches[0].pageX;
 	},
 	onTouchMove: function(e) {
-		var event = e || window.event;
-		e.preventDefault();
-		if(!this.isTouch || this.isAnimate){
+		if(this.isAnimate){
 			return;
 		}
+		var event = e || window.event;
+		e.preventDefault();
 		this.nowX = event.touches[0].pageX;
 		var moveX = this.nowX - this.startX,
 			left = this.left + moveX;
 		this.tag.style.webkitTransform = 'translate3d('+ left +'px, 0px, 0px)';
 	},
 	onTouchEnd: function(e) {
-		if(!this.isTouch){
-			return;
-		}
-		this.isTouch = false;
 		var moveX = this.nowX==0 ? 0 : (this.nowX - this.startX);
 		if(Math.abs(moveX)>50){
-			var flag = moveX>0 ? 1 : -1;
-			this.left += this.wd*flag;
-			this.current += flag*(-1);
-			this.isAnimate = true;
+			this.current = moveX>0 ? this.current-2 : this.current;
+			this.changePic(this.current);
+		}else{
+			this.tag.style.webkitTransition = '200ms all ease';
+			this.tag.style.webkitTransform = 'translate3d('+ this.left +'px, 0px, 0px)';
 		}
-		this.animate();
 		this.startX = 0;
 		this.nowX = 0;
 	},
 	// 点击切换
-	changePic: function(index,e) {
-		if(this.isTouch || this.isAnimate){
-			console.log(this.isTouch, this.isAnimate);
-			return;
-		}
+	changePic: function(index) {
 		clearInterval(this.timer);
 		this.timer = null;
 		this.current = (index>this.len-3) ? 0 : ++index;
@@ -178,6 +151,7 @@ var Banner = React.createClass({
 		this.animate();
 	},
 	animate: function(afterChange) {
+		this.isAnimate = true;
 		this.tag.style.webkitTransition = '200ms all ease';
 		this.tag.style.webkitTransform = 'translate3d('+ this.left +'px, 0px, 0px)';
 		this.tag.addEventListener('webkitTransitionEnd', function(){
@@ -187,7 +161,7 @@ var Banner = React.createClass({
 	},
 	animateCallBack: function() {
 		this.isAnimate = false;
-		this.tag.style.transition = 'none';
+		this.tag.style.webkitTransition = 'none';
 		if(this.current==-1){
 			this.left = (2-this.len)*this.wd;
 			this.current = this.len-3;
@@ -240,7 +214,7 @@ var Banner = React.createClass({
 					</div>
 					: ''}
 				</div>
-				{/* banner的圆点组件 */}
+				{/* banner的点击切换按钮组件 */}
 				{ len>1 ?
 				<div className="banner-control">
 				{
